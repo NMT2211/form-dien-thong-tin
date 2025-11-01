@@ -16,7 +16,7 @@ document.getElementById("contactForm").addEventListener("submit", e => {
     </span>`;
   feather.replace();
 
-  // Tạo iframe ẩn
+  // Tạo iframe ẩn để gửi (tránh CORS)
   const hiddenIframe = document.createElement("iframe");
   hiddenIframe.name = "hidden_iframe";
   hiddenIframe.style.display = "none";
@@ -46,43 +46,45 @@ document.getElementById("contactForm").addEventListener("submit", e => {
   hiddenInput.value = JSON.stringify(payload);
   form.appendChild(hiddenInput);
 
+  // Chỉ hiển thị thông báo khi iframe load xong (tức là Google Script đã xử lý)
+  hiddenIframe.onload = () => {
+    response.innerHTML = `
+      <div class="bg-green-50 border border-green-200 rounded-lg p-6 shadow-sm animate-fadeIn text-left">
+        <h2 class="text-green-700 text-lg font-semibold mb-2 flex items-center">
+          <i data-feather="check-circle" class="mr-2"></i> Gửi thành công!
+        </h2>
+        <p class="text-green-700 mb-4">Chúng tôi sẽ liên hệ lại với bạn trong thời gian sớm nhất.</p>
+        <div class="text-sm text-green-800 space-y-1">
+          <p><strong>🧑 Họ tên:</strong> ${payload.name}</p>
+          <p><strong>📧 Email:</strong> ${payload.email}</p>
+          <p><strong>📱 Số điện thoại:</strong> ${payload.phone || "—"}</p>
+          <p><strong>⚡ Loại hệ thống:</strong> ${payload.system_type || "Chưa chọn"}</p>
+          <p><strong>🔋 Nhu cầu điện:</strong> ${payload.power_usage}</p>
+          <p><strong>📝 Ghi chú:</strong> ${payload.message}</p>
+          <p><strong>📬 Nhận bản tin:</strong> ${payload.newsletter}</p>
+        </div>
+      </div>
+    `;
+    response.classList.remove("hidden");
+    response.classList.add("fade-in");
+
+    form.reset();
+
+    // Reset lại nút gửi sau khi hiển thị thành công
+    setTimeout(() => {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("opacity-80", "cursor-not-allowed", "scale-95");
+      submitBtn.innerHTML = '<i data-feather="send" class="mr-2"></i> Gửi yêu cầu tư vấn';
+      feather.replace();
+    }, 2000);
+
+    // Xoá input và iframe sau khi gửi thành công
+    setTimeout(() => {
+      hiddenInput.remove();
+      hiddenIframe.remove();
+    }, 3000);
+  };
+
   // Gửi form
   form.submit();
-
-  // 🎉 Hiển thị thông báo + thông tin tổng hợp
-  response.innerHTML = `
-    <div class="bg-green-50 border border-green-200 rounded-lg p-6 shadow-sm animate-fadeIn text-left">
-      <h2 class="text-green-700 text-lg font-semibold mb-2 flex items-center">
-        <i data-feather="check-circle" class="mr-2"></i> Gửi thành công!
-      </h2>
-      <p class="text-green-700 mb-4">Chúng tôi sẽ liên hệ lại với bạn trong thời gian sớm nhất.</p>
-      <div class="text-sm text-green-800 space-y-1">
-        <p><strong>🧑 Họ tên:</strong> ${payload.name}</p>
-        <p><strong>📧 Email:</strong> ${payload.email}</p>
-        <p><strong>📱 Số điện thoại:</strong> ${payload.phone || "—"}</p>
-        <p><strong>⚡ Loại hệ thống:</strong> ${payload.system_type || "Chưa chọn"}</p>
-        <p><strong>🔋 Nhu cầu điện:</strong> ${payload.power_usage}</p>
-        <p><strong>📝 Ghi chú:</strong> ${payload.message}</p>
-        <p><strong>📬 Nhận bản tin:</strong> ${payload.newsletter}</p>
-      </div>
-    </div>
-  `;
-  response.classList.remove("hidden");
-  response.classList.add("fade-in");
-
-  form.reset();
-
-  // Reset lại nút gửi sau 2 giây
-  setTimeout(() => {
-    submitBtn.disabled = false;
-    submitBtn.classList.remove("opacity-80", "cursor-not-allowed", "scale-95");
-    submitBtn.innerHTML = '<i data-feather="send" class="mr-2"></i> Gửi yêu cầu tư vấn';
-    feather.replace();
-  }, 2000);
-
-  // Dọn dẹp input & iframe
-  setTimeout(() => {
-    hiddenInput.remove();
-    hiddenIframe.remove();
-  }, 3000);
 });
