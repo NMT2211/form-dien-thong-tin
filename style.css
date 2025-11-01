@@ -120,3 +120,21 @@ button[disabled] {
   box-shadow: 0 6px 14px rgba(34, 197, 94, 0.3);
   transform: translateY(-3px);
 }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Nút gửi mượt hơn */
+button {
+  transition: all 0.25s ease-in-out;
+}
+
+button:hover:not([disabled]) {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
